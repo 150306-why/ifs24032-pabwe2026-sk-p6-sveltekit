@@ -10,6 +10,8 @@ import type {
   CoursePayload,
   CourseSummary,
   RatingPayload,
+  RawCourseDetail,
+  RawCourseSummary,
 } from "../types";
 
 export type MutationKey = "course" | "cover" | "student" | "rating" | "content";
@@ -47,10 +49,10 @@ const patch = (partial: Partial<CoursesState>) =>
   coursesStore.update((state) => ({ ...state, ...partial }));
 
 /** Melengkapi bidang yang mungkin tidak dikirim server agar antarmuka tidak rusak. */
-export function normalizeSummary(raw: Partial<CourseSummary>): CourseSummary {
+export function normalizeSummary(raw: RawCourseSummary): CourseSummary {
   return {
-    id: raw.id!,
-    user_id: raw.user_id!,
+    id: raw.id,
+    user_id: raw.user_id,
     title: raw.title ?? "",
     cover: raw.cover ?? null,
     description: raw.description ?? "",
@@ -63,7 +65,7 @@ export function normalizeSummary(raw: Partial<CourseSummary>): CourseSummary {
   };
 }
 
-export function normalizeDetail(raw: Partial<CourseDetail>): CourseDetail {
+export function normalizeDetail(raw: RawCourseDetail): CourseDetail {
   const contents = raw.contents ?? [];
   return {
     ...normalizeSummary(raw),

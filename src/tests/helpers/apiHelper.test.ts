@@ -3,6 +3,7 @@ import {
   apiHelper,
   clearToken,
   getBaseUrl,
+  trimTrailingSlashes,
   getErrorMessage,
   getToken,
   setToken,
@@ -15,6 +16,13 @@ describe("token & base url", () => {
     expect(getBaseUrl()).toBe("https://open-api.delcom.org/api/v1");
     vi.stubEnv("VITE_DELCOM_BASEURL", "https://x.test/api/");
     expect(getBaseUrl()).toBe("https://x.test/api");
+  });
+
+  it("trimTrailingSlashes membuang semua garis miring di akhir saja", () => {
+    expect(trimTrailingSlashes("https://x.test/api///")).toBe("https://x.test/api");
+    expect(trimTrailingSlashes("/a/b")).toBe("/a/b");
+    expect(trimTrailingSlashes("///")).toBe("");
+    expect(trimTrailingSlashes("")).toBe("");
   });
 
   it("menghasilkan string kosong bila env tidak diatur", () => {

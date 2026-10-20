@@ -15,8 +15,14 @@ interface RequestOptions {
 
 export const TOKEN_KEY = "delcom_token";
 
-export const getBaseUrl = (): string =>
-  (import.meta.env.VITE_DELCOM_BASEURL ?? "").replace(/\/+$/, "");
+/** Membuang garis miring di akhir tanpa regex (menghindari backtracking super-linear). */
+export function trimTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.codePointAt(end - 1) === 47) end--;
+  return value.slice(0, end);
+}
+
+export const getBaseUrl = (): string => trimTrailingSlashes(import.meta.env.VITE_DELCOM_BASEURL ?? "");
 
 export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY);
 export const setToken = (token: string): void => localStorage.setItem(TOKEN_KEY, token);
@@ -28,7 +34,8 @@ function buildUrl(path: string, query?: RequestOptions["query"]): string {
     if (value !== undefined) params.set(key, String(value));
   }
   const qs = params.toString();
-  return `${getBaseUrl()}${path}${qs ? `?${qs}` : ""}`;
+  const suffix = qs ? `?${qs}` : "";
+  return `${getBaseUrl()}${path}${suffix}`;
 }
 
 async function request<T>(
@@ -69,6 +76,6 @@ export const apiHelper = {
 export function getErrorMessage(response: ApiResponse<any>): string {
   const first = Object.values(response.data ?? {})
     .flat()
-    .find((value) => typeof value === "string");
-  return (first as string | undefined) ?? response.message;
+    .find((value): value is string => typeof value === "string");
+  return first ?? response.message;
 }

@@ -62,10 +62,17 @@ export interface RecordedCall {
   body: any;
   headers: Record<string, string>;
 }
-type Handler = unknown | ((call: RecordedCall) => unknown);
+type Handler = (call: RecordedCall) => unknown;
+type RouteValue = Handler | object | string | number | boolean | null;
+
+async function resolveRoute(handler: RouteValue | undefined, call: RecordedCall): Promise<unknown> {
+  if (handler === undefined) return fail(`Tidak ada mock untuk ${call.method} ${call.path}`);
+  if (typeof handler === "function") return await handler(call);
+  return handler;
+}
 
 /** Mengganti `fetch` global dengan penanggap berbasis "METHOD /path". */
-export function mockFetch(routes: Record<string, Handler>) {
+export function mockFetch(routes: Record<string, RouteValue>) {
   const calls: RecordedCall[] = [];
   const fn = vi.fn(async (input: string, init: RequestInit = {}) => {
     // Base URL bisa absolut (https://...) atau relatif (/api/v1), tergantung .env.
@@ -78,13 +85,7 @@ export function mockFetch(routes: Record<string, Handler>) {
       headers: (init.headers ?? {}) as Record<string, string>,
     };
     calls.push(call);
-    const handler = routes[`${call.method} ${call.path}`];
-    const payload =
-      handler === undefined
-        ? fail(`Tidak ada mock untuk ${call.method} ${call.path}`)
-        : typeof handler === "function"
-          ? await (handler as (c: RecordedCall) => unknown)(call)
-          : handler;
+    const payload = await resolveRoute(routes[`${call.method} ${call.path}`], call);
     return new Response(JSON.stringify(payload), {
       status: 200,
       headers: { "Content-Type": "application/json" },

@@ -7,10 +7,19 @@ export function formatDate(iso?: string | null): string {
   return date.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
 }
 
+// Dua pola sederhana (bukan satu regex besar) agar kompleksitas tetap rendah.
+const YOUTUBE_PATTERNS: RegExp[] = [
+  /^(?:https?:\/\/)?(?:www\.|m\.)?(?:youtu\.be|youtube\.com\/(?:embed|shorts|live))\/([\w-]{11})(?:[?&#/].*)?$/,
+  /^(?:https?:\/\/)?(?:www\.|m\.)?youtube\.com\/watch\?(?:.*&)?v=([\w-]{11})(?:[?&#/].*)?$/,
+];
+
 export function getYoutubeId(url: string): string | null {
-  const pattern =
-    /^(?:https?:\/\/)?(?:www\.|m\.)?(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([\w-]{11})(?:[?&#/].*)?$/;
-  return pattern.exec(url.trim())?.[1] ?? null;
+  const value = url.trim();
+  for (const pattern of YOUTUBE_PATTERNS) {
+    const id = pattern.exec(value)?.[1];
+    if (id) return id;
+  }
+  return null;
 }
 
 export function formatRating(value?: string | number | null): string {
@@ -25,7 +34,7 @@ export function formatPercent(value?: string | number | null): number {
 }
 
 export function confirmAction(message: string): boolean {
-  return window.confirm(message);
+  return globalThis.confirm(message);
 }
 
 export function initials(name: string): string {

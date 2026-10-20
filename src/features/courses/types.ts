@@ -56,3 +56,7 @@ export interface RatingPayload {
   ratings: RatingValue;
   comment: string;
 }
+
+/** Respons server: hanya `id` dan `user_id` yang dijamin ada. */
+export type RawCourseSummary = Partial<CourseSummary> & Pick<CourseSummary, "id" | "user_id">;
+export type RawCourseDetail = Partial<CourseDetail> & Pick<CourseDetail, "id" | "user_id">;

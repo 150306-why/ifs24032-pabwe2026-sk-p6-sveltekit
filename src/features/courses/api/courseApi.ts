@@ -3,10 +3,10 @@ import type {
   ContentPayload,
   ContentStatus,
   CourseContent,
-  CourseDetail,
   CoursePayload,
-  CourseSummary,
   RatingPayload,
+  RawCourseDetail,
+  RawCourseSummary,
 } from "../types";
 
 export const courseApi = {
@@ -20,10 +20,10 @@ export const courseApi = {
   updateCourse: (id: number, payload: CoursePayload) =>
     apiHelper.put(`/courses/${id}`, { body: payload }),
   getCourses: (onlyMine = false) =>
-    apiHelper.get<{ courses: Partial<CourseSummary>[] }>("/courses", {
+    apiHelper.get<{ courses: RawCourseSummary[] }>("/courses", {
       query: { is_me: onlyMine ? 1 : undefined },
     }),
-  getCourse: (id: number) => apiHelper.get<{ course: Partial<CourseDetail> }>(`/courses/${id}`),
+  getCourse: (id: number) => apiHelper.get<{ course: RawCourseDetail }>(`/courses/${id}`),
   deleteCourse: (id: number) => apiHelper.delete(`/courses/${id}`),
   deleteAllCourses: () => apiHelper.delete("/courses"),
 
