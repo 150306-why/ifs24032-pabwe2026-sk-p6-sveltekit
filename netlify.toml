@@ -1,0 +1,5 @@
+[build]
+  # Build with Node: Bun 1.3 exits before SvelteKit's adapter step when output is piped,
+  # so the publish directory never gets written
+  command = "npx vite build"
+  publish = "build"

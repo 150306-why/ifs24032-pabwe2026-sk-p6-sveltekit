@@ -1,5 +1,6 @@
 import { sveltekit } from "@sveltejs/kit/vite";
 import bunAdapter from "@sveltejs/adapter-bun";
+import netlifyAdapter from "@sveltejs/adapter-netlify";
 import tailwindcss from "@tailwindcss/vite";
 import { svelteTesting } from "@testing-library/svelte/vite";
 import { defineConfig, loadEnv } from "vite";
@@ -16,12 +17,15 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       sveltekit({
-        adapter: bunAdapter({
-          envPrefix: "APP_",
-          serverOptions: {
-            port: port,
-          },
-        }),
+        // Netlify builds set NETLIFY=true; elsewhere (Jenkins, local) keep the Bun server
+        adapter: process.env.NETLIFY
+          ? netlifyAdapter()
+          : bunAdapter({
+              envPrefix: "APP_",
+              serverOptions: {
+                port: port,
+              },
+            }),
         inlineStyleThreshold: 200000,
       }),
       tailwindcss(),
